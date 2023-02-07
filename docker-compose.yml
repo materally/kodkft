@@ -1,0 +1,46 @@
+version: "1"
+services:
+  kodkft-app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:3000"
+    volumes:
+      - "./app:/usr/src/app/kodkft"
+    networks:
+      - kodkft-net
+    depends_on:
+      - kodkft-db
+
+  kodkft-db:
+    build: 
+      context: ./db
+      dockerfile: Dockerfile
+    volumes:
+      - "./db/backup:/data/db"
+    environment:
+      - "MYSQL_DATABASE=test_db"
+      - "MYSQL_USER=teszt-user"
+      - "MYSQL_PASSWORD=jelszo123"
+      - "MYSQL_ROOT_PASSWORD=jelszo123"
+    networks:
+      - kodkft-net
+
+  phpmyadmin:
+    image: "phpmyadmin/phpmyadmin"
+    environment:
+      - "PMA_HOST=kodkft-db"
+      - "PMA_USER=teszt-user"
+      - "PMA_PASSWORD=jelszo123"
+      - "PMA_PORT=3306"
+    ports:
+      - "8181:80"
+    networks:
+      - kodkft-net
+    depends_on:
+      - kodkft-db
+
+networks:
+  kodkft-net:
+    driver: bridge
